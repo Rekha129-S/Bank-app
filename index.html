@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KODNEST BANK · secure dashboard</title>
+    
+    <!-- Font Awesome & Tailwind -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    
+    <style>
+        * { 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif; 
+        }
+
+        /* Bank professional gradient – clean, finance oriented */
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #f5f7fa 0%, #e9ecf0 100%);
+        }
+
+        /* main container uses light bank-like background */
+        .bank-panel {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        /* authentication glass (still fits bank) */
+        .auth-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 20px 40px -15px rgba(0,20,40,0.3);
+        }
+
+        /* Dashboard cards with light bank style */
+        .dashboard-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 18px rgba(0,20,40,0.08);
+            border: 1px solid rgba(0,40,80,0.05);
+            transition: all 0.15s ease;
+        }
+        .dashboard-card:hover {
+            box-shadow: 0 15px 25px -8px rgba(0,45,90,0.15);
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 28px;
+            padding: 32px 20px;
+            text-align: center;
+            color: #0b2b4a;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 20px -6px rgba(0,35,70,0.12);
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: #1e4a6f;
+            background: #f0f7ff;
+        }
+
+        .action-card i {
+            font-size: 42px;
+            color: #1e4a6f;
+            margin-bottom: 16px;
+        }
+
+        /* database table panel */
+        .database-section {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 18px rgba(0,20,40,0.05);
+            border: 1px solid #eef2f6;
+        }
+
+        .database-table th {
+            text-align: left;
+            padding: 12px 8px;
+            background: #e6eff9;
+            color: #113355;
+            font-weight: 600;
+            border-radius: 16px 16px 0 0;
+        }
+        .database-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #dde3e9;
+            color: #1f3a57;
+        }
+
+        /* input fields */
+        input, select {
+            background: white;
+            border: 1px solid #cbd5e0;
+            color: #0b2b4a !important;
+            font-weight: 400;
+            border-radius: 16px;
+            padding: 12px 16px;
+            width: 100%;
+        }
+        input:focus, select:focus {
+            outline: 2px solid #1e4a6f;
+            outline-offset: 2px;
+            background: white;
+            border-color: transparent;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            border: none;
+            box-shadow: 0 30px 60px rgba(0,20,40,0.3);
+        }
+
+        .balance-display {
+            background: linear-gradient(135deg, #113355 0%, #1e4a6f 100%);
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 28px;
+            background: #1e4a6f;
+            color: white;
+            border-radius: 40px;
+            border-left: 6px solid #f9a826;
+            box-shadow: 0 15px 30px -8px #1e4a6f40;
+            display: none;
+            z-index: 2000;
+            font-weight: 500;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.error {
+            background: #b22234;
+            border-left-color: #ffd966;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        #formWrapper {
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 1600px;
+        }
+        .slide-left {
+            transform: translateX(-50%);
+        }
+
+        /* Hide movie leftovers */
+        .movie-tag, .netflix-logo, [class*="netflix"] {
+            /* safe: we replace brand */
+        }
+        .bank-header-logo {
+            font-weight: 800;
+            font-size: 1.9rem;
+            color: #113355;
+            letter-spacing: -0.5px;
+        }
+        .top-bar {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.9);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- PRE‑LOGIN (BANK AUTH) with bank background instead of netflix -->
+    <div id="preLoginSection" class="w-full min-h-screen flex flex-col items-center justify-start px-4 md:px-12 pb-16 pt-4" 
+         style="background: linear-gradient(125deg, #eef5fa 0%, #d9e2ef 100%);">
+        
+        <!-- top bar (bank style) -->
+        <div class="w-full max-w-7xl flex justify-between items-center py-4 z-20">
+            <div class="flex items-center gap-3">
+                <span class="bank-header-logo">🏦 KODNEST</span>
+                <span class="text-xs bg-white/50 text-[#113355] px-3 py-1 rounded-full font-semibold">SECURE BANKING</span>
+            </div>
+            <div class="flex gap-6 text-sm font-medium text-[#1e3a5f]">
+                <a href="#" class="hover:underline">Accounts</a>
+                <a href="#" class="hover:underline">Deposits</a>
+                <a href="#" class="hover:underline">Support</a>
+            </div>
+        </div>
+
+        <!-- hero row: left bank intro, right auth -->
+        <div class="w-full max-w-7xl flex flex-col lg:flex-row gap-10 mt-12 z-10">
+            <!-- left: bank branding (no movie references) -->
+            <div class="flex-1 space-y-6">
+                <div class="flex items-center gap-2 text-sm text-[#1f486b]">
+                    <span class="w-8 h-0.5 bg-[#1e4a6f]"></span><span class="tracking-wider">FOUNDATION</span>
+                </div>
+                <h1 class="text-6xl md:text-7xl font-black tracking-tight leading-tight">
+                    <span class="text-[#0a2a44]">modern</span><br />
+                    <span class="text-[#1e4a6f]">digital banking</span>
+                </h1>
+                <div class="flex items-center gap-3 text-xl text-[#2c577b]">
+                    <i class="fa-solid fa-shield-halved"></i> <span>insured up to ₹5L</span>
+                </div>
+                <div class="flex gap-4 pt-3">
+                    <div class="bg-white/50 backdrop-blur-sm px-5 py-2 rounded-full text-[#113355] font-medium flex items-center gap-2">
+                        <i class="fa-regular fa-circle-check text-[#1e7e34]"></i> 10M+ customers
+                    </div>
+                    <div class="bg-white/50 backdrop-blur-sm px-5 py-2 rounded-full text-[#113355] font-medium flex items-center gap-2">
+                        <i class="fa-regular fa-star"></i> 4.8 trustpilot
+                    </div>
+                </div>
+            </div>
+
+            <!-- right: AUTH PANEL (bank style) -->
+            <div class="w-full lg:w-[450px] xl:w-[500px]">
+                <div class="auth-glass rounded-[40px] overflow-hidden shadow-2xl">
+                    <div id="formWrapper" class="flex w-[1600px] transition-transform duration-700 ease-in-out">
+                        <!-- REGISTER -->
+                        <div class="w-[800px] flex-shrink-0 p-8 space-y-5">
+                            <h2 class="text-3xl font-light text-[#0a2a44]">open account</h2>
+                            <p class="text-xs text-[#4f658d] flex items-center gap-2"><span class="w-6 h-px bg-[#9bb1cc]"></span>zero maintenance fee</p>
+                            <input id="r_uname" type="text" placeholder="Full Name" class="w-full bg-white border border-[#cbd5e0] text-[#113355]">
+                            <input id="r_email" type="email" placeholder="Email address" class="w-full bg-white border border-[#cbd5e0]">
+                            <input id="r_password" type="password" placeholder="Password (min 6 chars)" class="w-full bg-white border border-[#cbd5e0]">
+                            <div id="registerError" class="error-message hidden text-[#b22234] text-sm"></div>
+                            <button onclick="handleRegister()" class="w-full p-3 bg-[#1e4a6f] hover:bg-[#0d3450] rounded-2xl font-semibold text-white shadow-md transition">
+                                <i class="fas fa-user-plus mr-2"></i>Register
+                            </button>
+                            <p class="cursor-pointer text-sm text-[#4a6d8c] hover:text-[#0a2a44] underline underline-offset-2 transition" onclick="slideToLogin()">
+                                ➡️ already a client? Login
+                            </p>
+                        </div>
+                        <!-- LOGIN -->
+                        <div class="w-[800px] flex-shrink-0 p-8 space-y-5">
+                            <h2 class="text-3xl font-light text-[#0a2a44]">welcome back</h2>
+                            <p class="text-xs text-[#4f658d] flex items-center gap-2"><span class="w-6 h-px bg-[#9bb1cc]"></span>secure sign‑in</p>
+                            <input id="l_email" type="email" placeholder="Email" class="w-full bg-white border border-[#cbd5e0]" value="om@kodnest.com">
+                            <input id="l_password" type="password" placeholder="Password" class="w-full bg-white border border-[#cbd5e0]" value="onkar123">
+                            <div id="loginError" class="error-message hidden text-[#b22234] text-sm"></div>
+                            <button onclick="handleLogin()" class="w-full p-3 bg-[#1e4a6f] hover:bg-[#0d3450] rounded-2xl font-semibold text-white shadow-md">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Login
+                            </button>
+                            <p class="cursor-pointer text-sm text-[#4a6d8c] hover:text-[#0a2a44] underline underline-offset-2 transition" onclick="slideToRegister()">
+                                ⬅️ New customer? Register
+                            </p>
+                            <button onclick="showUsers()" class="mt-2 w-full text-xs text-[#5c6f8c] hover:text-[#0b2b4a] transition flex items-center justify-center gap-2 border border-[#ced9e8] py-2 rounded-full">
+                                <i class="fas fa-users"></i> Show registered users
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (bank only, movies completely removed) -->
+    <div id="dashboard" class="hidden w-full min-h-screen bg-[#f0f5fa] text-[#113355]">
+        <!-- top bar -->
+        <div class="fixed top-0 w-full bg-white/80 backdrop-blur-md z-30 px-8 py-3 flex items-center justify-between border-b border-[#d5e2f0]">
+            <div class="flex items-center gap-8">
+                <span class="text-3xl font-black text-[#1e4a6f]">KODNEST</span>
+                <div class="flex gap-6 text-sm font-medium">
+                    <span class="cursor-pointer text-[#1e4a6f] border-b-2 border-[#1e4a6f] pb-1" onclick="showBankingTab()">🏦 Banking</span>
+                    <span class="cursor-pointer text-[#64748b] hover:text-[#1e4a6f]">Cards</span>
+                    <span class="cursor-pointer text-[#64748b] hover:text-[#1e4a6f]">Deposits</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm border border-[#cbd5e1] bg-white px-3 py-1.5 rounded-full shadow-sm">
+                    <i class="fas fa-user-circle mr-1 text-[#1e4a6f]"></i> <span id="loggedUsername">user</span>
+                </span>
+                <button onclick="logout()" class="text-xs bg-[#eef4ff] hover:bg-[#e0eaff] px-4 py-1.5 rounded-full text-[#1e4a6f] font-medium">
+                    <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Banking Section (movies section removed) -->
+        <div id="bankingSection" class="pt-24 px-8 pb-16 max-w-7xl mx-auto">
+            <!-- welcome -->
+            <div class="dashboard-card mb-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-light text-[#113355]">Welcome, <span id="userName"></span></h2>
+                    <p class="text-[#547190]" id="userEmail"></p>
+                </div>
+                <div class="bg-[#e1ecf9] px-5 py-2 rounded-full text-sm font-semibold text-[#113355]">✔ verified</div>
+            </div>
+
+            <!-- action cards (banking) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="action-card" onclick="openCheckBalanceModal()">
+                    <i class="fas fa-eye"></i>
+                    <h3 class="text-xl font-semibold mb-2">Check Balance</h3>
+                    <p class="text-[#547190]">View account balance</p>
+                </div>
+                <div class="action-card" onclick="openTransferModal()">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h3 class="text-xl font-semibold mb-2">Transfer Money</h3>
+                    <p class="text-[#547190]">Instant transfers</p>
+                </div>
+            </div>
+
+            <!-- database: all users -->
+            <div class="database-section">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-database text-[#1e4a6f]"></i>
+                    <h3 class="text-xl font-medium">KODNEST account holders</h3>
+                </div>
+                <table class="database-table w-full">
+                    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Balance</th></tr></thead>
+                    <tbody id="databaseBody"></tbody>
+                </table>
+            </div>
+
+            <!-- quick transfer list -->
+            <div class="database-section">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-users text-[#1e4a6f]"></i>
+                    <h3 class="text-xl font-medium">Quick transfer contacts</h3>
+                </div>
+                <div id="recipientList" class="grid grid-cols-1 gap-2"></div>
+            </div>
+
+            <!-- recent transactions -->
+            <div class="database-section">
+                <h3 class="text-xl mb-4"><i class="fas fa-history mr-2 text-[#1e4a6f]"></i>Recent transactions</h3>
+                <div id="transactionsList"></div>
+            </div>
+        </div>
+        <!-- Movies section completely removed -->
+    </div>
+
+    <!-- BALANCE VERIFICATION MODAL -->
+    <div id="balanceModal" class="modal fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl text-[#113355]"><i class="fas fa-lock mr-2 text-[#1e4a6f]"></i>verify to view</h3>
+                <button class="text-3xl text-[#7f8fa0] hover:text-black" onclick="closeBalanceModal()">&times;</button>
+            </div>
+            <input type="email" id="verifyEmail" placeholder="Your Email" class="w-full mb-3">
+            <input type="password" id="verifyPassword" placeholder="Your Password" class="w-full">
+            <div class="flex gap-2 mt-5">
+                <button class="flex-1 p-3 bg-gray-200 rounded-xl text-[#113355]" onclick="closeBalanceModal()">Cancel</button>
+                <button class="flex-1 p-3 bg-[#1e4a6f] text-white rounded-xl hover:bg-[#0d3450]" onclick="verifyAndShowBalance()">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BALANCE DISPLAY MODAL -->
+    <div id="balanceDisplayModal" class="modal fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl text-[#113355]"><i class="fas fa-wallet mr-2 text-green-600"></i>Balance</h3>
+                <button class="text-3xl text-[#7f8fa0]" onclick="closeBalanceDisplayModal()">&times;</button>
+            </div>
+            <div class="balance-display">
+                <p class="text-lg opacity-90">current balance</p>
+                <h2 id="displayBalanceAmount" class="text-5xl font-bold mt-2">₹0</h2>
+            </div>
+            <button class="w-full mt-4 p-3 bg-[#1e4a6f] text-white rounded-xl" onclick="closeBalanceDisplayModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- TRANSFER MODAL -->
+    <div id="transferModal" class="modal fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl text-[#113355]"><i class="fas fa-exchange-alt mr-2 text-[#1e4a6f]"></i>Transfer</h3>
+                <button class="text-3xl text-[#7f8fa0]" onclick="closeTransferModal()">&times;</button>
+            </div>
+            <select id="transferToEmail" class="w-full mb-3 bg-white border border-[#cbd5e0] rounded-xl p-3"></select>
+            <input type="number" id="transferAmount" placeholder="Amount (₹)" class="w-full mb-3">
+            <input type="password" id="transferPassword" placeholder="Your Password" class="w-full">
+            <div class="flex gap-2 mt-5">
+                <button class="flex-1 p-3 bg-gray-200 rounded-xl" onclick="closeTransferModal()">Cancel</button>
+                <button class="flex-1 p-3 bg-[#1e4a6f] text-white rounded-xl" onclick="processTransfer()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- USERS MODAL (pre‑login) -->
+    <div id="userModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[70vh] overflow-auto p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-light text-[#113355]">📋 registered users</h2>
+                <button onclick="closeModal()" class="text-3xl text-[#7f8fa0] hover:text-black">&times;</button>
+            </div>
+            <table class="w-full text-sm text-left">
+                <thead class="border-b border-[#d0ddee] text-[#1e4a6f]"><tr><th class="pb-2">Name</th><th class="pb-2">Email</th><th class="pb-2">Balance</th></tr></thead>
+                <tbody id="userTable" class="text-[#2b4b6f]"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIG ==========
+        let users = JSON.parse(localStorage.getItem('kodnest_users')) || [];
+        let transactions = JSON.parse(localStorage.getItem('kodnest_transactions')) || [];
+        let currentUser = null;
+
+        // ========== TOAST ==========
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + (type === 'error' ? 'error' : '');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function encryptPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + 'kodnest_salt_2024');
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // ========== AUTH ==========
+        function slideToLogin() { document.getElementById("formWrapper").classList.add("slide-left"); }
+        function slideToRegister() { document.getElementById("formWrapper").classList.remove("slide-left"); }
+
+        async function handleRegister() {
+            const name = document.getElementById('r_uname').value.trim();
+            const email = document.getElementById('r_email').value.trim();
+            const password = document.getElementById('r_password').value;
+            if (!name || !email || !password) return showToast('Fill all fields', 'error');
+            if (password.length < 6) return showToast('Password min 6 chars', 'error');
+            if (users.some(u => u.email === email)) return showToast('Email already used', 'error');
+
+            const encryptedPassword = await encryptPassword(password);
+            const newUser = { id: users.length+1, name, email, password: encryptedPassword, balance: 100000 };
+            users.push(newUser);
+            localStorage.setItem('kodnest_users', JSON.stringify(users));
+            showToast('Registered, please login');
+            document.getElementById('r_uname').value = ''; document.getElementById('r_email').value = ''; document.getElementById('r_password').value = '';
+            slideToLogin();
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('l_email').value.trim();
+            const password = document.getElementById('l_password').value;
+            if (!email || !password) return showToast('Enter credentials', 'error');
+            const encrypted = await encryptPassword(password);
+            const user = users.find(u => u.email === email && u.password === encrypted);
+            if (!user) return showToast('Invalid email/password', 'error');
+
+            currentUser = user;
+            document.getElementById('preLoginSection').style.display = 'none';
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('loggedUsername').textContent = user.name.split(' ')[0];
+            updateDatabaseDisplay();
+            loadUserTransactions();
+            showBankingTab(); 
+            showToast(`Welcome, ${user.name}`);
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('preLoginSection').style.display = 'flex';
+            slideToRegister();
+        }
+
+        // ========== BANKING UI ==========
+        function updateDatabaseDisplay() {
+            const tbody = document.getElementById('databaseBody');
+            const recipientList = document.getElementById('recipientList');
+            const select = document.getElementById('transferToEmail');
+            let tbodyHtml = '', recipientHtml = '', selectHtml = '<option value="">Select recipient</option>';
+            users.forEach(u => {
+                tbodyHtml += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>₹${u.balance.toLocaleString()}</td></tr>`;
+                if (currentUser && u.email !== currentUser.email) {
+                    recipientHtml += `<div class="bg-[#f4f9ff] hover:bg-[#e4edf8] p-3 rounded-xl cursor-pointer" onclick="selectRecipient('${u.email}')"><div class="font-medium">${u.name}</div><div class="text-sm text-[#547190]">${u.email}</div></div>`;
+                    selectHtml += `<option value="${u.email}">${u.name} (${u.email})</option>`;
+                }
+            });
+            tbody.innerHTML = tbodyHtml;
+            if (recipientList) recipientList.innerHTML = recipientHtml || '<p class="text-[#547190]">No other users</p>';
+            if (select) select.innerHTML = selectHtml;
+        }
+
+        function selectRecipient(email) { document.getElementById('transferToEmail').value = email; openTransferModal(); }
+        function openCheckBalanceModal() { document.getElementById('balanceModal').classList.add('flex'); }
+        function closeBalanceModal() { document.getElementById('balanceModal').classList.remove('flex'); }
+        function closeBalanceDisplayModal() { document.getElementById('balanceDisplayModal').classList.remove('flex'); }
+
+        async function verifyAndShowBalance() {
+            const email = document.getElementById('verifyEmail').value;
+            const password = document.getElementById('verifyPassword').value;
+            const encrypted = await encryptPassword(password);
+            const user = users.find(u => u.email === email && u.password === encrypted);
+            if (!user) return showToast('Invalid credentials', 'error');
+            closeBalanceModal();
+            document.getElementById('displayBalanceAmount').textContent = `₹${user.balance.toLocaleString()}`;
+            document.getElementById('balanceDisplayModal').classList.add('flex');
+        }
+
+        function openTransferModal() { document.getElementById('transferModal').classList.add('flex'); updateDatabaseDisplay(); }
+        function closeTransferModal() { document.getElementById('transferModal').classList.remove('flex'); }
+
+        async function processTransfer() {
+            if (!currentUser) return;
+            const toEmail = document.getElementById('transferToEmail').value;
+            const amount = parseInt(document.getElementById('transferAmount').value);
+            const password = document.getElementById('transferPassword').value;
+            if (!toEmail || !amount || !password) return showToast('All fields required', 'error');
+            const encrypted = await encryptPassword(password);
+            if (encrypted !== currentUser.password) return showToast('Incorrect password', 'error');
+            if (amount > currentUser.balance) return showToast('Insufficient balance', 'error');
+            const recipient = users.find(u => u.email === toEmail);
+            if (!recipient) return showToast('Recipient not found', 'error');
+
+            currentUser.balance -= amount;
+            recipient.balance += amount;
+            localStorage.setItem('kodnest_users', JSON.stringify(users));
+
+            const transaction = { id: transactions.length+1, fromEmail: currentUser.email, fromName: currentUser.name, toEmail: recipient.email, toName: recipient.name, amount, date: new Date().toISOString() };
+            transactions.push(transaction);
+            localStorage.setItem('kodnest_transactions', JSON.stringify(transactions));
+
+            closeTransferModal();
+            updateDatabaseDisplay();
+            loadUserTransactions();
+            showToast(`₹${amount.toLocaleString()} sent to ${recipient.name}`);
+        }
+
+        function loadUserTransactions() {
+            if (!currentUser) return;
+            const userTransactions = transactions.filter(t => t.fromEmail === currentUser.email || t.toEmail === currentUser.email).reverse().slice(0,5);
+            const div = document.getElementById('transactionsList');
+            if (!userTransactions.length) { div.innerHTML = '<p class="text-[#547190]">No transactions</p>'; return; }
+            let html = '';
+            userTransactions.forEach(t => {
+                const isDebit = t.fromEmail === currentUser.email;
+                const other = isDebit ? t.toName : t.fromName;
+                const date = new Date(t.date).toLocaleDateString();
+                html += `<div class="flex justify-between py-2 border-b border-[#e2e8f0]"><div><p>${isDebit ? 'Sent to' : 'Received from'} ${other}</p><small class="text-[#7f8fa0]">${date}</small></div><span class="${isDebit ? 'text-red-500' : 'text-green-600'} font-medium">${isDebit ? '-₹' : '+₹'}${t.amount.toLocaleString()}</span></div>`;
+            });
+            div.innerHTML = html;
+        }
+
+        function showBankingTab() { /* only one tab now */ }
+
+        // ========== USER MODAL ==========
+        function showUsers() {
+            const tbody = document.getElementById("userTable");
+            tbody.innerHTML = "";
+            if (!users.length) tbody.innerHTML = '<tr><td colspan="3" class="py-6 text-center text-[#7f8fa0]">No users</td></tr>';
+            else users.forEach(u => tbody.innerHTML += `<tr class="border-b border-[#dee8f2]"><td class="py-2">${u.name}</td><td class="py-2">${u.email}</td><td class="py-2">₹${u.balance}</td></tr>`);
+            document.getElementById("userModal").classList.remove("hidden");
+            document.getElementById("userModal").classList.add("flex");
+        }
+        function closeModal() { document.getElementById("userModal").classList.add("hidden"); document.getElementById("userModal").classList.remove("flex"); }
+
+        // ========== INIT ==========
+        async function initializeDefaultUsers() {
+            if (users.length === 0) {
+                const p1 = await encryptPassword('onkar123');
+                const p2 = await encryptPassword('abhay123');
+                const p3 = await encryptPassword('raj123');
+                const p4 = await encryptPassword('priya123');
+                users = [
+                    { id:1, name:'Omkar Patil', email:'om@kodnest.com', password:p1, balance:500000 },
+                    { id:2, name:'Abhaya Sharma', email:'ab@kodnest.com', password:p2, balance:600000 },
+                    { id:3, name:'Raj Kumar', email:'raj@kodnest.com', password:p3, balance:250000 },
+                    { id:4, name:'Priya Singh', email:'priya@kodnest.com', password:p4, balance:350000 }
+                ];
+                localStorage.setItem('kodnest_users', JSON.stringify(users));
+            }
+        }
+
+        window.onload = async function() { await initializeDefaultUsers(); document.getElementById('preLoginSection').style.display = 'flex'; document.getElementById('dashboard').classList.add('hidden'); };
+        document.getElementById('userModal')?.addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+    </script>
+</body>
+</html>
